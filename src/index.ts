@@ -2,8 +2,10 @@ import express from "express";
 import { PORT } from "./config";
 import { userRouter } from "./routes/userRoutes";
 import prisma from "./db/prisma";
+import { getEnvKeys } from "./utils/fetchEnvSample";
 
 const app = express();
+const requiredKeys = getEnvKeys();
 
 app.use(express.json());
 
@@ -31,10 +33,13 @@ app.get("/users", async (req, res) => {
 })
 
 // with checks if any env variable is missing:
-if (!PORT) {
-  console.log("SOME ENVIRONMENT VARIABLE IS MISSING!");
-} else {
-  app.listen(PORT, () => {
-    console.log(`Backend is up: http://localhost:${PORT}`);
-  })
-}
+requiredKeys.forEach((k) => {
+  if (!process.env[k]) {
+    console.error(`Missing required environment variable: ${k}`);
+    process.exit(1);
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Backend is up: http://localhost:${PORT}`);
+})
