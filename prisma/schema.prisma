@@ -13,7 +13,61 @@ model User {
   username        String  @unique
   password        String
 
+  notes     Note[]
+  subjects  Subject[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+// Organizes notes by subjects! (eg, "Physics", "Engineering Math.." etc.)
+model Subject {
+  id          String   @id @default(cuid())
+  name        String
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  notes       Note[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  title       String?  // optional
+  content     String?  // Text notes
+  isPinned    Boolean  @default(false)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId   String?
+  subject     Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  media       Media[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([userId])
+  @@index([subjectId])
+  @@index([isPinned])
+}
+
+// S3 URLs and METADATA for images, audio, and documents, etc.
+model Media {
+  id          String    @id @default(cuid())
+  url         String    // The AWS S3 public/signed URL
+  key         String    // The S3 object key (needed to delete files from S3 later)
+  type        MediaType 
+  mimeType    String?   // e.g., "image/jpeg", "audio/mpeg"
+  size        Int?      // Size in BYTES
+  noteId      String
+  note        Note      @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  @@index([noteId])
+}
+
+enum MediaType {
+  IMAGE
+  AUDIO
+  FILE
+}

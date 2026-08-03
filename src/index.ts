@@ -1,6 +1,7 @@
 import express from "express";
 import { PORT } from "./config";
 import { userRouter } from "./routes/userRoutes";
+import { mediaRouter } from "./routes/mediaRoutes";
 import prisma from "./db/prisma";
 import { getEnvKeys } from "./utils/fetchEnvSample";
 
@@ -10,6 +11,7 @@ const requiredKeys = getEnvKeys();
 app.use(express.json());
 
 app.use("/auth/user", userRouter);
+app.use("/notes", mediaRouter);
 
 app.get("/", (req, res) => {
   res.send("The Last Glance App's Server is UP!!!");
