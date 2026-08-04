@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../db/prisma';
+import { uploadFileToS3 } from '../utils/s3';
 
 export const createNote = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -10,12 +11,34 @@ export const createNote = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
+    let mediaData: any[] = [];
+
+    // If an image was uploaded, upload it to S3
+    if (req.file) {
+      const { originalname, mimetype, buffer, size } = req.file;
+      const { url, key } = await uploadFileToS3(buffer, mimetype, originalname);
+      
+      mediaData.push({
+        url,
+        key,
+        type: 'IMAGE',
+        mimeType: mimetype,
+        size
+      });
+    }
+
     const note = await prisma.note.create({
       data: {
         userId,
         title,
         content,
+        media: {
+          create: mediaData
+        }
       },
+      include: {
+        media: true
+      }
     });
 
     res.status(201).json(note);
@@ -37,6 +60,9 @@ export const getNotes = async (req: Request, res: Response): Promise<void> => {
     const notes = await prisma.note.findMany({
       where: {
         userId: String(userId)
+      },
+      include: {
+        media: true
       },
       orderBy: { createdAt: 'desc' },
     });
