@@ -4,7 +4,7 @@ import { uploadFileToS3 } from '../utils/s3';
 
 export const createNote = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId, title, content } = req.body;
+    const { userId, title, content, subjectId } = req.body;
 
     if (!userId) {
       res.status(400).json({ error: 'User ID is required' });
@@ -32,6 +32,7 @@ export const createNote = async (req: Request, res: Response): Promise<void> => 
         userId,
         title,
         content,
+        subjectId,
         media: {
           create: mediaData
         }
@@ -50,16 +51,16 @@ export const createNote = async (req: Request, res: Response): Promise<void> => 
 
 export const getNotes = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.params;
+    const { subjectId } = req.params;
 
-    if (!userId) {
-      res.status(400).json({ error: 'User ID is required' });
+    if (!subjectId) {
+      res.status(400).json({ error: 'Subject ID is required' });
       return;
     }
 
     const notes = await prisma.note.findMany({
       where: {
-        userId: String(userId)
+        subjectId: String(subjectId)
       },
       include: {
         media: true

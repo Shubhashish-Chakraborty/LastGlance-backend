@@ -8,4 +8,4 @@ export const mediaRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 mediaRouter.post("/", upload.single("media"), createNote);
-mediaRouter.get("/:userId", getNotes);
+mediaRouter.get("/subject/:subjectId", getNotes);
