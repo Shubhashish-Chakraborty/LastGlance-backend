@@ -44,6 +44,11 @@ requiredKeys.forEach((k) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend is up: http://localhost:${PORT}`);
-})
+export default app;
+
+// keep app.listen only for local dev:
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`Backend is up: http://localhost:${PORT}`);
+  });
+}
