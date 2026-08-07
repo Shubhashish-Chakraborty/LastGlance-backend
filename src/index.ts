@@ -36,6 +36,14 @@ app.get("/users", async (req, res) => {
   }
 })
 
+app.post("/wakeup" , async (req, res) => {
+  // // intentional delay, while testing locally!
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
+  res.status(200).json({
+    isAlive: true
+  })
+})
+
 // with checks if any env variable is missing:
 requiredKeys.forEach((k) => {
   if (!process.env[k]) {
