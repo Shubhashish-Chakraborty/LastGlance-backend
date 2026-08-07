@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node ./dist/src/index.js",
     "build": "prisma generate && tsc -b",
-    "dev": "tsc -b && node ./dist/src/index.js"
+    "dev": "tsc -b && node ./dist/src/index.js",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
