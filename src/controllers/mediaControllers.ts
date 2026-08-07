@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../db/prisma';
-import { uploadFileToS3 } from '../utils/s3';
+import { deleteFileFromS3, uploadFileToS3 } from '../utils/s3';
 
 export const createNote = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -17,7 +17,7 @@ export const createNote = async (req: Request, res: Response): Promise<void> => 
     if (req.file) {
       const { originalname, mimetype, buffer, size } = req.file;
       const { url, key } = await uploadFileToS3(buffer, mimetype, originalname);
-      
+
       mediaData.push({
         url,
         key,
@@ -72,5 +72,38 @@ export const getNotes = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error('Failed to get notes:', error);
     res.status(500).json({ error: 'Failed to get notes' });
+  }
+};
+
+export const deleteNote = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { noteId } = req.params;
+
+    if (!noteId) {
+      res.status(400).json({ error: 'Note ID is required' });
+      return;
+    }
+
+    // Delete the note and its associated media
+    const deletedNote = await prisma.note.delete({
+      where: { id: String(noteId) },
+      include: { media: true }
+    });
+
+    // Remove the actual files from S3
+    if (deletedNote.media && deletedNote.media.length > 0) {
+      await Promise.all(
+        deletedNote.media.map((m) =>
+          deleteFileFromS3(m.key).catch((err) =>
+            console.error(`Failed to delete S3 object ${m.key}:`, err)
+          )
+        )
+      );
+    }
+
+    res.status(200).json(deletedNote);
+  } catch (error) {
+    console.error('Failed to delete note:', error);
+    res.status(500).json({ error: 'Failed to delete note' });
   }
 };

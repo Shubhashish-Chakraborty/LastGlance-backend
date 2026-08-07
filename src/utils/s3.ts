@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import {
   AWS_REGION,
@@ -38,4 +38,13 @@ export const uploadFileToS3 = async (
     url: `https://${AWS_S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${key}`,
     key,
   };
+};
+
+export const deleteFileFromS3 = async (key: string) => {
+  const command = new DeleteObjectCommand({
+    Bucket: AWS_S3_BUCKET_NAME,
+    Key: key,
+  });
+
+  await s3Client.send(command);
 };
