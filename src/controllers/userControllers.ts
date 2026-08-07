@@ -94,7 +94,7 @@ export const login = async (req: Request, res: Response) => {
 
         // Generate JWT token
         const token = jwt.sign(
-            { id: user.id, email: user.username },
+            { id: user.id, username: user.username },
             JWT_SECRET,
             { expiresIn: '30d' },
         );
@@ -141,7 +141,7 @@ export const changeUsername = async (req: AuthRequest, res: Response) => {
     const updated = await prisma.user.update({
       where: { id: userId },
       data: { ...(username && { username }) },
-      select: { id: true, username: true, email: true, role: true },
+      select: { id: true, username: true },
     });
 
     res.status(200).json({ success: true, user: updated });
