@@ -37,18 +37,16 @@ app.get("/users", async (req, res) => {
 })
 
 // with checks if any env variable is missing:
-requiredKeys.forEach((k) => {
-  if (!process.env[k]) {
-    console.error(`Missing required environment variable: ${k}`);
-    process.exit(1);
-  }
-});
-
-export default app;
-
-// keep app.listen only for local dev:
+// only doing this on local development not in prod
 if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, () => {
-    console.log(`Backend is up: http://localhost:${PORT}`);
+  requiredKeys.forEach((k) => {
+    if (!process.env[k]) {
+      console.error(`Missing required environment variable: ${k}`);
+      process.exit(1);
+    }
   });
 }
+
+app.listen(PORT, () => {
+  console.log(`Backend is up: http://localhost:${PORT}`);
+})
