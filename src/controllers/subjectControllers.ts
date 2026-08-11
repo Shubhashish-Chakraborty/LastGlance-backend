@@ -29,6 +29,61 @@ export const createSubject = async (req: Request, res: Response): Promise<void> 
   }
 };
 
+export const editSubjects = async (req: Request, res: Response): Promise<void> => { // subjectName only tho
+  try {
+    const { subjectId } = req.params;
+    const { newname } = req.body; // new subject name!
+    const authReq = req as any;
+    const currentUserId = authReq.user?.id;
+
+    if (!subjectId) {
+      res.status(400).json({ error: 'Subject ID is required' });
+      return;
+    }
+
+    if (!newname) {
+      res.status(400).json({
+        error: "New Subject Name is required!"
+      });
+      return;
+    }
+
+    const subject = await prisma.subject.findUnique({
+      where: {
+        id: String(subjectId)
+      }
+    });
+
+    if (!subject) {
+      res.status(404).json({
+        error: 'Subject not found'
+      });
+      return;
+    }
+
+    if (subject.userId !== currentUserId) {
+      res.status(403).json({
+        error: "Unauthorized"
+      });
+      return;
+    }
+
+    const updatedSubject = await prisma.subject.update({
+      where: {
+        id: String(subjectId)
+      },
+      data: {
+        name: newname
+      },
+    });
+
+    res.status(200).json(updatedSubject);
+  } catch (error: any) {
+    console.error('Failed to update subject:', error);
+    res.status(500).json({ error: 'Failed to update subject' });
+  }
+}
+
 export const getSubjects = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
