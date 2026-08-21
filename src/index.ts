@@ -44,6 +44,12 @@ app.post("/wakeup" , async (req, res) => {
   })
 })
 
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: 'online'
+  })
+})
+
 // with checks if any env variable is missing:
 requiredKeys.forEach((k) => {
   if (!process.env[k]) {
