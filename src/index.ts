@@ -16,7 +16,9 @@ app.use("/notes", mediaRouter);
 app.use("/subjects", subjectRouter);
 
 app.get("/", (req, res) => {
-  res.send("The Last Glance App's Server is UP!!!");
+  res.json({
+    message: "The Last Glance App's Server is UP!"
+  });
 });
 
 app.get("/users", async (req, res) => {
