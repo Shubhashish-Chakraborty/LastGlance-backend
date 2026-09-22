@@ -1,4 +1,4 @@
-name: Deploy Backend to VM
+name: Deploy to VM
 
 on:
   push:
@@ -19,15 +19,10 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            # Navigate to the backend directory on your VM
-            cd /var/www/lastglance/backend
-            
-            # Pull latest changes from git
+            set -e
+            cd ${{ secrets.VM_PROJECT_PATH }}
             git pull origin main
-            
-            # Rebuild and restart the docker container
             docker compose -f docker-compose.prod.yml down
             docker compose -f docker-compose.prod.yml up --build -d
-            
-            # Optional: Clean up old unused docker images
+            # Optional clean
             docker image prune -f
