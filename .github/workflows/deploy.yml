@@ -1,0 +1,33 @@
+name: Deploy Backend to VM
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            # Navigate to the backend directory on your VM
+            cd /var/www/lastglance/backend
+            
+            # Pull latest changes from git
+            git pull origin main
+            
+            # Rebuild and restart the docker container
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up --build -d
+            
+            # Optional: Clean up old unused docker images
+            docker image prune -f
